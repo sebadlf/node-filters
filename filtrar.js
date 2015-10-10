@@ -1,10 +1,12 @@
 var fs = require('fs');
 var _ = require('lodash');
+var iconv = require('iconv-lite');
 
 function fileToArray (fileName, separator, addLineNumbers) {
-	var lineas = fs.readFileSync(fileName)
-					.toString()
-					.split('\n');
+
+	var buff = iconv.decode(fs.readFileSync(fileName), 'win1252');
+
+	var lineas = buff.toString().split('\n');
 
 	lineas = _.reject(lineas, function (linea) {
 		return linea.trim().length < 1;
@@ -30,9 +32,13 @@ function fileToArray (fileName, separator, addLineNumbers) {
 function saveToFile (fileName, array) {	
 	var lineas = array.map(function (row) {
 		return row.join(';')
-	})
+	});
 
-	return fs.writeFileSync(fileName, lineas.join('\n'), 'utf8');
+	lineas = lineas.join('\n');
+
+	var buf = iconv.encode(lineas, 'win1252');
+
+	return fs.writeFileSync(fileName, buf, 'utf8');
 }
 
 function existeLineaEnDoppler (lineaFava, arrayDoppler) {
@@ -82,5 +88,3 @@ saveToFile('ReporteError.csv', reporteError);
 console.log('Subscriptores: ', datosFava.length);
 console.log('Ok: ', lineasOK.length);
 console.log('Errores: ', lineasError.length);
-
-console.log(reporteOK[41]);
